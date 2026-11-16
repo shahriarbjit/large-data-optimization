@@ -1,47 +1,20 @@
-<laravel-boost-guidelines>
-# Laravel Application
+# Project rules (read before every task)
+- Laravel API modular monolith. Code lives in modules/{Module}. See docs/architecture.md and docs/api-conventions.md.
+- A module imports another module's Contracts, DTOs and Events only. Never its Services, Http, Models or tables.
+- Controllers are thin: FormRequest -> DTO -> Service -> API Resource. Business logic lives in Services.
+- All errors use the standard error format. Throw ApiException subclasses; do not return ad-hoc JSON errors.
+- Money is a string with two decimals in JSON and DECIMAL in the database, never float.
+- Every write endpoint has a FormRequest. Authorization uses Policies once auth exists.
+- New module: run `php artisan module:make Name`; do not copy folders by hand.
+- Every change includes tests. Run `composer ci` before declaring work done.
+- No new packages without asking. Check the installed version's docs before using an API; do not invent methods.
+- Keep tasks small. If a task is ambiguous or touches money, auth, or stock in a new way, stop and ask.
+- Record design decisions in docs/decisions/ (options, choice, reason, date).
 
-This repository contains a Laravel application. Complete the following setup before working on the user's request.
-
-## Prerequisites
-
-Verify that PHP and Composer are available:
-
-```sh
-php -v
-composer -V
-```
-
-If either command is unavailable, detect the user's operating system and install the prerequisites with the appropriate command:
-
-macOS:
-
-```sh
-/bin/bash -c "$(curl -fsSL https://php.new/install/mac/8.5)"
-```
-
-Windows PowerShell:
-
-```powershell
-Set-ExecutionPolicy Bypass -Scope Process -Force; [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; iex ((New-Object System.Net.WebClient).DownloadString('https://php.new/install/windows/8.5'))
-```
-
-Linux:
-
-```sh
-/bin/bash -c "$(curl -fsSL https://php.new/install/linux/8.5)"
-```
-
-After installation, ask the user to restart their terminal. If the agent needs the restarted shell to continue, ask the user to reopen their terminal and rerun their original prompt.
-
-## Agent Setup
-
-Install Laravel Boost from the application root before making application changes:
-
-```sh
-composer require laravel/boost --dev
-php artisan boost:install
-```
-
-Boost replaces these bootstrap instructions with guidelines tailored to the application. After installation, read `AGENTS.md` again and continue with the user's original request using the generated guidelines.
-</laravel-boost-guidelines>
+## Quick reference
+- Versions: Laravel 13, PHP 8.4, Pest 5, Larastan 3 (level 8), Deptrac 4 (`deptrac/deptrac`), Pint.
+- Checks: `composer ci` = `composer lint` + `composer analyse` + `composer deptrac` + `composer test`. Fix style with `composer lint:fix`.
+- No database yet: never run `php artisan migrate`; never add `unique`/`exists` rules (leave a `// TODO(db): ...` comment).
+- Unfinished endpoints throw `Modules\Shared\Exceptions\NotImplementedException` (501).
+- Markers: `TODO(db)` (needs tables), `TODO(auth)` (needs authentication). Search for them before starting either.
+- Do not remove the `module:make` markers in config/modules.php and deptrac.yaml.
