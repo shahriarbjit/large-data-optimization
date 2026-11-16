@@ -33,7 +33,7 @@ return [
         'local' => [
             'driver' => 'local',
             'root' => storage_path('app/private'),
-            'serve' => true,
+            'serve' => false, // API-only: no signed local file URLs (docs/decisions/0003)
             'throw' => false,
             'report' => false,
         ],
