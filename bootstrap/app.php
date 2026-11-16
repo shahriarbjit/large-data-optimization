@@ -1,5 +1,6 @@
 <?php
 
+use App\Console\Commands\MakeModuleCommand;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -28,6 +29,9 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
         apiPrefix: 'api',
     )
+    ->withCommands([
+        MakeModuleCommand::class,
+    ])
     ->withMiddleware(function (Middleware $middleware): void {
         // First in the global stack, so they also cover 404/405 and
         // errors raised by Laravel's own global middleware.

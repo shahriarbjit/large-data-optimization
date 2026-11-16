@@ -1,0 +1,16 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Modules\{{Module}}\Contracts;
+
+use Modules\{{Module}}\DTOs\ExampleData;
+
+/**
+ * Public API of the {{Module}} module. Other modules may depend on this
+ * interface (and on this module's DTOs and Events), never on its Services.
+ */
+interface {{Module}}ServiceContract
+{
+    public function createExample(ExampleData $data): ExampleData;
+}

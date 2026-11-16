@@ -1,0 +1,16 @@
+<?php
+
+declare(strict_types=1);
+
+it('validates POST /api/v1/{{module-kebab}}/examples', function (): void {
+    $this->postJson('/api/v1/{{module-kebab}}/examples', [])
+        ->assertUnprocessable()
+        ->assertJsonPath('code', 'validation_failed')
+        ->assertJsonValidationErrors(['name']);
+});
+
+it('answers 501 until POST /api/v1/{{module-kebab}}/examples is implemented', function (): void {
+    $this->postJson('/api/v1/{{module-kebab}}/examples', ['name' => 'Example'])
+        ->assertStatus(501)
+        ->assertJsonPath('code', 'not_implemented');
+});

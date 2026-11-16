@@ -1,0 +1,28 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Modules\{{Module}}\Http\Requests;
+
+use Modules\Shared\Http\Requests\BaseFormRequest;
+use Modules\{{Module}}\DTOs\ExampleData;
+
+final class CreateExampleRequest extends BaseFormRequest
+{
+    /**
+     * @return array<string, mixed>
+     */
+    public function rules(): array
+    {
+        return [
+            'name' => ['required', 'string', 'min:2', 'max:100'],
+        ];
+    }
+
+    public function toData(): ExampleData
+    {
+        return new ExampleData(
+            name: $this->string('name')->toString(),
+        );
+    }
+}

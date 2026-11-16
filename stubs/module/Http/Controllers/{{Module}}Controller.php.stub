@@ -1,0 +1,27 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Modules\{{Module}}\Http\Controllers;
+
+use Illuminate\Http\JsonResponse;
+use Modules\{{Module}}\Contracts\{{Module}}ServiceContract;
+use Modules\{{Module}}\Http\Requests\CreateExampleRequest;
+use Modules\{{Module}}\Http\Resources\ExampleResource;
+
+/**
+ * Thin controller: FormRequest -> DTO -> Service -> API Resource.
+ */
+final class {{Module}}Controller
+{
+    public function __construct(
+        private readonly {{Module}}ServiceContract $service,
+    ) {}
+
+    public function store(CreateExampleRequest $request): JsonResponse
+    {
+        $example = $this->service->createExample($request->toData());
+
+        return (new ExampleResource($example))->response()->setStatusCode(201);
+    }
+}

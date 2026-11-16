@@ -1,0 +1,21 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Modules\{{Module}}\Providers;
+
+use Illuminate\Support\ServiceProvider;
+use Modules\{{Module}}\Contracts\{{Module}}ServiceContract;
+use Modules\{{Module}}\Services\{{Module}}Service;
+
+/**
+ * Registered in config/modules.php. Binds this module's contracts to their
+ * implementations. Routes are loaded by routes/api.php, not here.
+ */
+final class {{Module}}ServiceProvider extends ServiceProvider
+{
+    public function register(): void
+    {
+        $this->app->bind({{Module}}ServiceContract::class, {{Module}}Service::class);
+    }
+}

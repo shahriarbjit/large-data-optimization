@@ -1,0 +1,14 @@
+<?php
+
+declare(strict_types=1);
+
+use Illuminate\Support\Facades\Route;
+use Modules\{{Module}}\Http\Controllers\{{Module}}Controller;
+
+/*
+ * {{Module}} routes. Loaded by routes/api.php inside the /api/v1 group,
+ * so the full path is /api/v1/{{module-kebab}}/...
+ */
+Route::prefix('{{module-kebab}}')->name('{{module-kebab}}.')->group(function (): void {
+    Route::post('examples', [{{Module}}Controller::class, 'store'])->name('examples.store');
+});

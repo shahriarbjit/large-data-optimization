@@ -1,0 +1,16 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Modules\{{Module}}\DTOs;
+
+/**
+ * Example DTO: a readonly data object passed between layers and modules.
+ * Rename it for your feature (e.g. CreatePaymentData).
+ */
+final readonly class ExampleData
+{
+    public function __construct(
+        public string $name,
+    ) {}
+}

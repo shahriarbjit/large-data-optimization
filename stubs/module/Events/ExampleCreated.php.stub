@@ -1,0 +1,18 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Modules\{{Module}}\Events;
+
+use Modules\{{Module}}\DTOs\ExampleData;
+
+/**
+ * Example domain event. Other modules react to it with listeners instead of
+ * calling into this module. Carry DTOs, never models.
+ */
+final readonly class ExampleCreated
+{
+    public function __construct(
+        public ExampleData $example,
+    ) {}
+}

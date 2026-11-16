@@ -1,0 +1,20 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Modules\{{Module}}\Services;
+
+use Modules\Shared\Exceptions\NotImplementedException;
+use Modules\{{Module}}\Contracts\{{Module}}ServiceContract;
+use Modules\{{Module}}\DTOs\ExampleData;
+
+/**
+ * Business logic for the {{Module}} module. Stub: every method answers 501.
+ */
+final class {{Module}}Service implements {{Module}}ServiceContract
+{
+    public function createExample(ExampleData $data): ExampleData
+    {
+        throw new NotImplementedException;
+    }
+}
