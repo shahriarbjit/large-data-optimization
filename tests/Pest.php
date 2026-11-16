@@ -13,3 +13,9 @@ pest()->extend(TestCase::class)->in(
     'Feature',
     '../modules/*/tests/Feature',
 );
+
+/**
+ * Keys every error body has (docs/api-conventions.md).
+ * Validation errors add "errors" on top of these.
+ */
+const ERROR_KEYS = ['type', 'title', 'status', 'detail', 'code', 'request_id'];
