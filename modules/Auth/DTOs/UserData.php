@@ -16,6 +16,7 @@ final readonly class UserData
         public string $name,
         public string $email,
         public string $phone,
+        public UserRole $role,
         public CarbonImmutable $createdAt,
     ) {}
 }

@@ -11,20 +11,37 @@ Quality gates: Pint, Larastan (level 8), Deptrac (module boundaries) and Pest (f
 
 ## Requirements
 
-- PHP **8.4+** with the curl, fileinfo, intl, mbstring, openssl and zip extensions
+- PHP **8.4+** with the curl, fileinfo, intl, mbstring, openssl, zip and pdo_mysql extensions
 - Composer 2
-- **No database.** Do not run `php artisan migrate` ([ADR 0002](docs/decisions/0002-no-database-in-template.md)).
+- MySQL 8+ ([ADR 0006](docs/decisions/0006-mysql-sanctum-roles.md))
 
 ## Setup
+
+Create two databases first (app and tests):
+
+```sql
+CREATE DATABASE urban_nest_api CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+CREATE DATABASE urban_nest_api_testing CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+```
 
 ```bash
 git clone <repo-url> urban-nest-api && cd urban-nest-api
 composer install
-cp .env.example .env
+cp .env.example .env         # then set DB_USERNAME / DB_PASSWORD
 php artisan key:generate
-composer ci          # lint, static analysis, boundaries, tests
-php artisan serve    # http://127.0.0.1:8000
+php artisan migrate
+php artisan db:seed          # admin + user accounts and 1,000,000 fake users (~70 s; SEED_BULK_USERS=0 to skip)
+composer ci                  # lint, static analysis, boundaries, tests
+php artisan serve            # http://127.0.0.1:8000
 ```
+
+Seeded accounts (local only; change them with the `SEED_*` variables in `.env`):
+
+| Role | Email | Password |
+| --- | --- | --- |
+| admin | `admin@urban-nest.test` | `Admin@123456` |
+| user | `user@urban-nest.test` | `User@1234567` |
+| user / guest (bulk) | `user1@example.test` … `user1000000@example.test` (every 10th is a guest) | `password1234` |
 
 Try it:
 

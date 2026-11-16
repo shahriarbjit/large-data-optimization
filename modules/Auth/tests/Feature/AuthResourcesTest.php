@@ -6,11 +6,12 @@ use Carbon\CarbonImmutable;
 use Illuminate\Http\Request;
 use Modules\Auth\DTOs\AuthTokenData;
 use Modules\Auth\DTOs\UserData;
+use Modules\Auth\DTOs\UserRole;
 use Modules\Auth\Http\Resources\AuthTokenResource;
 use Modules\Auth\Http\Resources\UserResource;
 
 /*
- * The resources document the response contract before the endpoints work.
+ * The resources document the response contract.
  */
 
 function sampleUser(): UserData
@@ -20,6 +21,7 @@ function sampleUser(): UserData
         name: 'Rahim Uddin',
         email: 'rahim@example.com',
         phone: '+8801712345678',
+        role: UserRole::Admin,
         createdAt: CarbonImmutable::parse('2026-01-02 03:04:05', 'UTC'),
     );
 }
@@ -30,6 +32,7 @@ it('renders a user', function (): void {
         'name' => 'Rahim Uddin',
         'email' => 'rahim@example.com',
         'phone' => '+8801712345678',
+        'role' => 'admin',
         'created_at' => '2026-01-02T03:04:05Z',
     ]);
 });
@@ -47,5 +50,5 @@ it('renders an access token with its user', function (): void {
         'access_token' => 'token-value',
         'token_type' => 'Bearer',
         'expires_at' => '2026-01-09T03:04:05Z',
-    ])->and($json['data']['user']['email'])->toBe('rahim@example.com');
+    ])->and($json['data']['user']['role'])->toBe('admin');
 });

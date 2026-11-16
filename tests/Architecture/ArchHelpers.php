@@ -16,7 +16,6 @@ final class ArchHelpers
      */
     public const array SHIPPED_APP_FILES = [
         'app/Http/Controllers/Controller.php',
-        'app/Models/User.php',
         'app/Providers/AppServiceProvider.php',
     ];
 

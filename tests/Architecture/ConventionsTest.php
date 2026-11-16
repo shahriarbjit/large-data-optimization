@@ -22,12 +22,11 @@ arch('classes are final by default (abstract base classes excepted)')
         BaseFormRequest::class,
         // Laravel's shipped app/ files are left untouched.
         'App\Http\Controllers\Controller',
-        'App\Models',
         'App\Providers\AppServiceProvider',
     ]);
 
-arch('no Eloquent models in the template yet (models come with the first migration)')
-    ->expect('Modules')
+arch('no models in app/: each model lives in its module (Modules\{Module}\Models)')
+    ->expect('App')
     ->not->toExtend('Illuminate\Database\Eloquent\Model');
 
 arch('Shared exceptions extend ApiException')
@@ -83,6 +82,20 @@ foreach (ArchHelpers::modules() as $module) {
         ->expect("Modules\\{$module}\\Http\\Resources")
         ->toExtend(JsonResource::class)
         ->toHaveSuffix('Resource');
+
+    arch("{$module}: only Models extend Eloquent Model")
+        ->expect("Modules\\{$module}")
+        ->not->toExtend('Illuminate\Database\Eloquent\Model')
+        ->ignoring("Modules\\{$module}\\Models");
+
+    arch("{$module}: models are used only by the module's Services, Database and Providers")
+        ->expect("Modules\\{$module}\\Models")
+        ->toOnlyBeUsedIn([
+            "Modules\\{$module}\\Services",
+            "Modules\\{$module}\\Database",
+            "Modules\\{$module}\\Models",
+            "Modules\\{$module}\\Providers",
+        ]);
 
     arch("{$module}: providers extend ServiceProvider")
         ->expect("Modules\\{$module}\\Providers")

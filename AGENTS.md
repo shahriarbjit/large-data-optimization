@@ -12,9 +12,11 @@
 - Record design decisions in docs/decisions/ (options, choice, reason, date).
 
 ## Quick reference
-- Versions: Laravel 13, PHP 8.4, Pest 5, Larastan 3 (level 8), Deptrac 4 (`deptrac/deptrac`), Pint.
+- Versions: Laravel 13, PHP 8.4, Sanctum 4, Pest 5, Larastan 3 (level 8), Deptrac 4 (`deptrac/deptrac`), Pint.
 - Checks: `composer ci` = `composer lint` + `composer analyse` + `composer deptrac` + `composer test`. Fix style with `composer lint:fix`.
-- No database yet: never run `php artisan migrate`; never add `unique`/`exists` rules (leave a `// TODO(db): ...` comment).
+- Database: MySQL (`urban_nest_api`; tests use `urban_nest_api_testing` with RefreshDatabase). Each module owns its tables: models in `Modules\{Module}\Models`, migrations in `modules/{Module}/Database/Migrations` (loaded by the module's provider). See docs/decisions/0006.
+- Auth: Sanctum bearer tokens (`auth:sanctum`). Roles are `user`, `admin`, `guest` (`Modules\Auth\DTOs\UserRole`); never let a client choose its role.
+- Orders has no tables yet: keep its `TODO(db)` markers until Orders is implemented.
 - Unfinished endpoints throw `Modules\Shared\Exceptions\NotImplementedException` (501).
 - Markers: `TODO(db)` (needs tables), `TODO(auth)` (needs authentication). Search for them before starting either.
 - Do not remove the `module:make` markers in config/modules.php and deptrac.yaml.

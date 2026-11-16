@@ -1,6 +1,6 @@
 # 0002: No database in the template
 
-- **Status:** Accepted
+- **Status:** Superseded by [0006](0006-mysql-sanctum-roles.md) (database, Sanctum and roles added 2026-11-16)
 - **Date:** 2026-11-16
 
 ## Context

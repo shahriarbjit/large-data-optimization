@@ -12,7 +12,7 @@ use Modules\Auth\DTOs\UserData;
  * Response shape of a user:
  *
  *   { "id": 1, "name": "Rahim Uddin", "email": "rahim@example.com",
- *     "phone": "+8801712345678", "created_at": "2026-01-02T03:04:05Z" }
+ *     "phone": "+8801712345678", "role": "user", "created_at": "2026-01-02T03:04:05Z" }
  *
  * @property UserData $resource
  */
@@ -28,6 +28,7 @@ final class UserResource extends JsonResource
             'name' => $this->resource->name,
             'email' => $this->resource->email,
             'phone' => $this->resource->phone,
+            'role' => $this->resource->role->value,
             'created_at' => $this->resource->createdAt->toIso8601ZuluString(),
         ];
     }

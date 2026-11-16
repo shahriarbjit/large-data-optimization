@@ -16,8 +16,17 @@ final class LoginRequest extends BaseFormRequest
     {
         return [
             'email' => ['required', 'string', 'email', 'max:190'],
-            'password' => ['required', 'string'],
+            'password' => ['required', 'string', 'max:72'],
         ];
+    }
+
+    protected function prepareForValidation(): void
+    {
+        $email = $this->input('email');
+
+        if (is_string($email)) {
+            $this->merge(['email' => mb_strtolower($email)]);
+        }
     }
 
     public function toData(): LoginData

@@ -77,7 +77,8 @@ GET /api/v1/orders?page=2&per_page=20&sort=-placed_at&filter[status]=paid&filter
 | Status | `code` | When |
 | --- | --- | --- |
 | 400 | `bad_request` | Malformed request. |
-| 401 | `unauthenticated` | Missing or invalid credentials. |
+| 401 | `unauthenticated` | Missing, invalid or expired bearer token. |
+| 401 | `invalid_credentials` | Wrong email or password on login. |
 | 403 | `forbidden` | Authenticated but not allowed (Policies). |
 | 404 | `not_found` (or specific, e.g. `order_not_found`) | Unknown URL or resource. |
 | 405 | `method_not_allowed` | Wrong HTTP method; the `Allow` header lists the right ones. |
@@ -157,10 +158,10 @@ Responses carry `X-RateLimit-Limit` and `X-RateLimit-Remaining`. A 429 response 
 | Method and path | Request | Status today |
 | --- | --- | --- |
 | `GET /api/v1/health` | none | 200 `{ data: { status, app, version, time } }` |
-| `POST /api/v1/auth/register` | `name` (2-100), `email` (max 190), `phone` (`01XXXXXXXXX` or `+8801XXXXXXXXX`), `password` (min 10) + `password_confirmation` | 422 or 501 |
-| `POST /api/v1/auth/login` | `email`, `password` | 422 or 501 |
-| `POST /api/v1/auth/logout` | none (authentication to come) | 501 |
-| `GET /api/v1/auth/me` | none (authentication to come) | 501 |
+| `POST /api/v1/auth/register` | `name` (2-100), `email` (max 190, unique), `phone` (`01XXXXXXXXX` or `+8801XXXXXXXXX`, unique, stored as `+880…`), `password` (10-72) + `password_confirmation` | 201 `{ data: { access_token, token_type, expires_at, user } }` with role `user`; 422 |
+| `POST /api/v1/auth/login` | `email`, `password` | 200 same shape; 401 `invalid_credentials`; 422 |
+| `POST /api/v1/auth/logout` | `Authorization: Bearer {token}` | 204 (token revoked); 401 `unauthenticated` |
+| `GET /api/v1/auth/me` | `Authorization: Bearer {token}` | 200 `{ data: { id, name, email, phone, role, created_at } }`; 401 |
 | `GET /api/v1/orders` | `page`, `per_page`, `sort` (`placed_at`, `total`, either with `-`), `filter[status]`, `filter[channel]` | 422 or 501 |
 | `POST /api/v1/orders` | `channel` (`web`, `pos`, `whatsapp`, `agent`), `location_id`, `items[]` (`variant_id`, `qty` >= 1), `notes` (max 500); optional `Idempotency-Key` header | 422 or 501 |
 | `GET /api/v1/orders/{order}` | none | 501 |
