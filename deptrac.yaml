@@ -1,0 +1,47 @@
+# Module boundary rules. Written for deptrac/deptrac 4.7.
+# Docs: https://github.com/deptrac/deptrac/tree/4.7.2/docs
+#
+# How it works:
+# - "Shared" is the shared kernel. It may depend on no module.
+# - "ModulesPublic" holds every module's public surface:
+#   Modules\{Module}\Contracts, DTOs and Events. Any module may use it.
+# - Each module has one layer for its internals (everything else in the
+#   module: Services, Http, Providers, ...). Only that module may use it.
+# - "App" is the Laravel app/ folder (console commands). It may only use Shared.
+# - Classes outside every layer (Laravel, vendor packages) are not checked.
+#
+# Adding a module: `php artisan module:make Name` appends the layer and the
+# ruleset entry below the "module:make" markers. Do not remove the markers.
+deptrac:
+  paths:
+    - ./app
+    - ./modules
+
+  exclude_files:
+    - '#/tests/#'
+
+  layers:
+    - name: App
+      collectors:
+        - type: classLike
+          value: ^App\\.*
+
+    - name: Shared
+      collectors:
+        - type: classLike
+          value: ^Modules\\Shared\\.*
+
+    - name: ModulesPublic
+      collectors:
+        - type: classLike
+          value: ^Modules\\(?!Shared\\)[A-Za-z0-9]+\\(Contracts|DTOs|Events)\\.*
+
+    # module:make layers
+
+  ruleset:
+    App:
+      - Shared
+    Shared: ~
+    ModulesPublic:
+      - Shared
+    # module:make ruleset

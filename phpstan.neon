@@ -1,0 +1,21 @@
+includes:
+    - vendor/larastan/larastan/extension.neon
+
+parameters:
+    level: 8
+
+    paths:
+        - app
+        - modules
+        - routes
+        - bootstrap/app.php
+
+    excludePaths:
+        # Pest test files are closures bound to a TestCase at runtime;
+        # PHPStan cannot type `$this` inside them.
+        - modules/*/tests/*
+
+    tmpDir: storage/framework/cache/phpstan
+
+    # Fail on unused @phpstan-ignore comments so suppressions do not rot.
+    reportUnmatchedIgnoredErrors: true
