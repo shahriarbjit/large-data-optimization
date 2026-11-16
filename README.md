@@ -52,6 +52,45 @@ curl -i http://127.0.0.1:8000/api/v1/orders/1               # 501 not_implemente
 curl -i http://127.0.0.1:8000/api/v1/nope                   # 404, standard error format
 ```
 
+## Run with Docker (any PC, no PHP or MySQL needed)
+
+Needs only [Docker Desktop](https://www.docker.com/products/docker-desktop/) (or Docker Engine with Compose v2).
+
+```bash
+git clone <repo-url> urban-nest-api && cd urban-nest-api
+docker compose up -d --build
+docker compose logs -f app       # wait for "[entrypoint] ready" (about 1 minute the first time)
+```
+
+Then open http://localhost:8080/api/v1/health.
+
+On the **first start**, with an empty database, the app container:
+- runs the migrations;
+- seeds the admin and user accounts above;
+- seeds 1,000,000 fake users (about 30 seconds).
+
+Later starts keep the data and skip seeding.
+
+| What | Where |
+| --- | --- |
+| API | http://localhost:8080 (`DOCKER_HTTP_PORT`) |
+| MySQL | `localhost:3307`, user `root`, password `secret` (`DOCKER_DB_PORT`, `DOCKER_DB_PASSWORD`) |
+| Databases | `urban_nest_api` (app), `urban_nest_api_testing` (tests) |
+
+| Command | What it does |
+| --- | --- |
+| `docker compose up -d --build` | Build and start; rebuild after code changes. |
+| `docker compose logs -f app` | Follow the app logs (JSON lines). |
+| `docker compose exec app php artisan route:list` | Run any artisan command. |
+| `docker compose --profile test run --rm --build test` | Run `composer ci` (lint, Larastan, Deptrac, Pest) in Docker. |
+| `docker compose down` | Stop; data is kept. |
+| `docker compose down -v` | Stop and **delete all data**; the next `up` migrates and seeds again. |
+
+To seed fewer users, set `DOCKER_SEED_BULK_USERS=1000` (or `0`) in your shell, or in a `.env` file next to `compose.yaml`, **before the first start**. Images:
+- `app`: PHP 8.4 FPM, without dev packages; see `Dockerfile`.
+- `web`: nginx in front of `app`; see `docker/nginx/default.conf`.
+- `db`: MySQL 8.4 with a named volume.
+
 ## Commands
 
 | Command | What it does |

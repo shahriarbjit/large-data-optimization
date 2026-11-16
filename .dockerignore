@@ -1,0 +1,22 @@
+# Never copy local secrets or machine-specific files into the image.
+.env
+.env.*
+!.env.example
+.git
+.github
+.idea
+.vscode
+.phpunit.cache
+.phpunit.result.cache
+.deptrac.cache
+node_modules
+vendor
+
+# Generated on the host (may list dev-only packages); rebuilt in the image.
+bootstrap/cache/*.php
+
+storage/logs/*
+storage/framework/cache/*
+storage/framework/sessions/*
+storage/framework/views/*
+storage/app/*
