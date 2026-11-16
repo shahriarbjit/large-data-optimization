@@ -36,6 +36,26 @@ deptrac:
         - type: classLike
           value: ^Modules\\(?!Shared\\)[A-Za-z0-9]+\\(Contracts|DTOs|Events)\\.*
 
+    - name: Auth
+      collectors:
+        - type: bool
+          must:
+            - type: classLike
+              value: ^Modules\\Auth\\.*
+          must_not:
+            - type: layer
+              value: ModulesPublic
+
+    - name: Orders
+      collectors:
+        - type: bool
+          must:
+            - type: classLike
+              value: ^Modules\\Orders\\.*
+          must_not:
+            - type: layer
+              value: ModulesPublic
+
     # module:make layers
 
   ruleset:
@@ -44,4 +64,10 @@ deptrac:
     Shared: ~
     ModulesPublic:
       - Shared
+    Auth:
+      - Shared
+      - ModulesPublic
+    Orders:
+      - Shared
+      - ModulesPublic
     # module:make ruleset

@@ -2,6 +2,9 @@
 
 declare(strict_types=1);
 
+use Modules\Auth\Providers\AuthServiceProvider;
+use Modules\Orders\Providers\OrdersServiceProvider;
+
 /*
  * Enabled modules, in load order: module name => its service provider.
  *
@@ -17,6 +20,8 @@ declare(strict_types=1);
 return [
 
     'enabled' => [
+        'Auth' => AuthServiceProvider::class,
+        'Orders' => OrdersServiceProvider::class,
         // module:make providers
     ],
 
