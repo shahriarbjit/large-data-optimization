@@ -106,6 +106,8 @@ Later starts keep the data and skip seeding.
 | `docker compose down` | Stop; data is kept. |
 | `docker compose down -v` | Stop and **delete all data**; the next `up` migrates and seeds again. |
 
+**Port already in use** (for example another project on 8080, so `web` fails to start): add `DOCKER_HTTP_PORT=8081` to `.env` (Compose reads it), then run `docker compose up -d web`. The same works for `DOCKER_DB_PORT`, `DOCKER_ES_PORT` and `DOCKER_KIBANA_PORT`.
+
 To seed less, set `DOCKER_SEED_BULK_USERS=1000` and `DOCKER_SEED_PRODUCTS=100000` (or `0`) in your shell, or in a `.env` file next to `compose.yaml`, **before the first start**. Images:
 - `app`: PHP 8.4 FPM, without dev packages; see `Dockerfile`.
 - `web`: nginx in front of `app`; see `docker/nginx/default.conf`.
