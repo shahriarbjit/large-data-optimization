@@ -12,6 +12,9 @@
 node_modules
 vendor
 
+# The React app has its own image (frontend/Dockerfile).
+frontend
+
 # Generated on the host (may list dev-only packages); rebuilt in the image.
 bootstrap/cache/*.php
 

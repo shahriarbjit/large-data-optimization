@@ -43,6 +43,15 @@ GET /api/v1/orders?page=2&per_page=20&sort=-placed_at&filter[status]=paid&filter
 ```
 
 - **Pagination:** `page` (default 1) and `per_page` (default 20, maximum 100; set in `config/api.php`). Out-of-range values are a 422. Use `Modules\Shared\Http\Resources\PaginatedCollection`.
+- **Cursor pagination, for very large tables** (products, users): counting millions of rows and deep `OFFSET`s are too slow, so these lists take `per_page` and `cursor` instead of `page` ([ADR 0008](decisions/0008-react-frontend.md)). There is no total. Send `?cursor={meta.next_cursor}` for the next page and `meta.prev_cursor` for the previous one. Use `CursorListRequest` and `CursorPaginatedCollection` from Shared.
+
+  ```json
+  {
+    "data": [ ... ],
+    "meta": { "per_page": 20, "next_cursor": "eyJpZCI6...", "prev_cursor": null },
+    "links": { "prev": null, "next": "...?per_page=20&cursor=eyJpZCI6..." }
+  }
+  ```
 - **Sorting:** `sort=field` sorts ascending; `sort=-field` sorts descending. Each endpoint lists its sortable fields; any other value is a 422. Several fields will be comma-separated (`sort=-placed_at,id`) when needed.
 - **Filtering:** `filter[field]=value`. Each endpoint lists its filters; an unknown filter or value is a 422.
 
@@ -162,6 +171,9 @@ Responses carry `X-RateLimit-Limit` and `X-RateLimit-Remaining`. A 429 response 
 | `POST /api/v1/auth/login` | `email`, `password` | 200 same shape; 401 `invalid_credentials`; 422 |
 | `POST /api/v1/auth/logout` | `Authorization: Bearer {token}` | 204 (token revoked); 401 `unauthenticated` |
 | `GET /api/v1/auth/me` | `Authorization: Bearer {token}` | 200 `{ data: { id, name, email, phone, role, created_at } }`; 401 |
+| `GET /api/v1/products` | `per_page` (1-100, default 20), `cursor` | 200 cursor list of active products, newest first; 422 |
+| `GET /api/v1/products/{id}` | none | 200 `{ data: { id, sku, name, description, brand, category, color, tags, price, currency, stock, rating, reviews_count, image, is_active, created_at, updated_at } }`; 404 `product_not_found` (unknown or inactive) |
+| `GET /api/v1/users` | `Authorization: Bearer {token}` of an **admin**; `per_page`, `cursor` | 200 cursor list of users, newest first; 401; 403 `forbidden` for `user` and `guest` |
 | `GET /api/v1/orders` | `page`, `per_page`, `sort` (`placed_at`, `total`, either with `-`), `filter[status]`, `filter[channel]` | 422 or 501 |
 | `POST /api/v1/orders` | `channel` (`web`, `pos`, `whatsapp`, `agent`), `location_id`, `items[]` (`variant_id`, `qty` >= 1), `notes` (max 500); optional `Idempotency-Key` header | 422 or 501 |
 | `GET /api/v1/orders/{order}` | none | 501 |

@@ -9,7 +9,7 @@
 #
 # Optional overrides (shell or a .env file next to this one): DOCKER_HTTP_PORT,
 # DOCKER_DB_PORT, DOCKER_DB_PASSWORD, DOCKER_SEED_BULK_USERS, DOCKER_SEED_PRODUCTS,
-# ELASTIC_VERSION, DOCKER_ES_HEAP, DOCKER_ES_PORT, DOCKER_KIBANA_PORT.
+# DOCKER_FRONTEND_PORT, ELASTIC_VERSION, DOCKER_ES_HEAP, DOCKER_ES_PORT, DOCKER_KIBANA_PORT.
 
 name: urban-nest-api
 
@@ -83,6 +83,17 @@ services:
     depends_on:
       app:
         condition: service_healthy
+
+  # React app (frontend/), http://localhost:3000. Its nginx forwards /api to "web".
+  frontend:
+    build:
+      context: ./frontend
+    image: urban-nest-frontend:latest
+    restart: unless-stopped
+    ports:
+      - "${DOCKER_FRONTEND_PORT:-3000}:80"
+    depends_on:
+      - web
 
   # Elasticsearch for local search practice. Security is OFF: never expose
   # this port to a network. Bound to 127.0.0.1 so only this PC can reach it.

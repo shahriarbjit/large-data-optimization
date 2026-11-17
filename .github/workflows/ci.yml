@@ -68,3 +68,30 @@ jobs:
 
       - name: Run composer ci (lint, analyse, deptrac, test)
         run: composer ci
+
+  frontend:
+    name: frontend (lint, type-check, build)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci --no-fund --no-audit
+
+      - name: Lint (oxlint)
+        run: npm run lint
+
+      - name: Type-check and build
+        run: npm run build

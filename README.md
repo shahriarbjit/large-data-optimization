@@ -1,6 +1,6 @@
 # urban-nest-api
 
-A Laravel 13 **API starter template**, organised as a modular monolith. It is JSON only, versioned under `/api/v1`, and needs no database.
+A Laravel 13 **API starter template**, organised as a modular monolith. The backend is JSON only, versioned under `/api/v1`, on MySQL. A separate React app in `frontend/` uses it.
 
 It already includes:
 - the standard error format, request IDs and rate limiting;
@@ -41,7 +41,7 @@ Seeded accounts (local only; change them with the `SEED_*` variables in `.env`):
 | --- | --- | --- |
 | admin | `admin@urban-nest.test` | `Admin@123456` |
 | user | `user@urban-nest.test` | `User@1234567` |
-| user / guest (bulk) | `user1@example.test` … `user1000000@example.test` (every 10th is a guest) | `password1234` |
+| user / guest (bulk) | `user1@example.test` Ã¢â‚¬Â¦ `user1000000@example.test` (every 10th is a guest) | `password1234` |
 
 Try it:
 
@@ -71,6 +71,30 @@ The Catalog module seeds a `products` table with 10,000,000 realistic rows: `php
 
 Product number *n* always gets the same data (`ProductRowGenerator`).
 
+## Frontend (React)
+
+`frontend/` is a React 19 + TypeScript app built with Vite ([ADR 0008](docs/decisions/0008-react-frontend.md)). It has these pages:
+- products, with a search bar (UI only until Elasticsearch);
+- product details;
+- users, for admins only;
+- login.
+
+Run it next to `php artisan serve` (needs Node 20+):
+
+```bash
+cd frontend
+npm install
+npm run dev          # http://localhost:5173 ; /api is forwarded to http://127.0.0.1:8000
+```
+
+| Command (in `frontend/`) | What it does |
+| --- | --- |
+| `npm run dev` | Dev server with hot reload. Change the API address with `API_PROXY_TARGET=http://127.0.0.1:8081` in `frontend/.env.local`. |
+| `npm run build` | Type-check and build to `frontend/dist`. |
+| `npm run lint` | oxlint. |
+
+Log in as `admin@urban-nest.test` / `Admin@123456` to see the users page.
+
 ## Run with Docker (any PC, no PHP or MySQL needed)
 
 Needs only [Docker Desktop](https://www.docker.com/products/docker-desktop/) (or Docker Engine with Compose v2).
@@ -93,6 +117,7 @@ Later starts keep the data and skip seeding.
 
 | What | Where |
 | --- | --- |
+| React app | http://localhost:3000 (`DOCKER_FRONTEND_PORT`) |
 | API | http://localhost:8080 (`DOCKER_HTTP_PORT`) |
 | MySQL | `localhost:3307`, user `root`, password `secret` (`DOCKER_DB_PORT`, `DOCKER_DB_PASSWORD`) |
 | Databases | `urban_nest_api` (app), `urban_nest_api_testing` (tests) |
@@ -126,7 +151,7 @@ curl "http://localhost:9200/_cluster/health?pretty"
 | What | Where |
 | --- | --- |
 | Elasticsearch | http://localhost:9200 (`DOCKER_ES_PORT`) |
-| Kibana | http://localhost:5601 (`DOCKER_KIBANA_PORT`); Dev Tools: menu ☰ → Management → **Dev Tools**, or http://localhost:5601/app/dev_tools#/console |
+| Kibana | http://localhost:5601 (`DOCKER_KIBANA_PORT`); Dev Tools: menu Ã¢ËœÂ° Ã¢â€ â€™ Management Ã¢â€ â€™ **Dev Tools**, or http://localhost:5601/app/dev_tools#/console |
 | From Laravel | `config('services.elasticsearch.host')`: `ELASTICSEARCH_HOST`, `http://elasticsearch:9200` inside Docker |
 
 - Kibana takes 1-2 minutes to become ready after Elasticsearch is healthy.
@@ -145,7 +170,7 @@ curl "http://localhost:9200/_cluster/health?pretty"
 | `composer deptrac` | Check module boundaries (Deptrac). |
 | `composer test` | Pest: feature, unit, module and architecture tests. |
 | `php artisan module:make Name` | Create a new module (see below). |
-| `php artisan route:list` | Show the 9 API routes plus `/up`. |
+| `php artisan route:list` | Show the 12 API routes plus `/up`. |
 
 ## Folder structure
 
@@ -160,11 +185,13 @@ modules/
   Shared/                                    shared kernel: errors, request id, base classes, health
   Auth/                                      skeleton: register, login, logout, me
   Orders/                                    skeleton: list, place, show, cancel
+  Catalog/                                   products table, list and details endpoints
     Contracts/ DTOs/ Events/                 public: other modules may use these
     Services/ Http/ Providers/ Policies/      internal: only this module uses these
     routes/api_v1.php
     tests/
 tests/                                       app-level, Shared and architecture tests
+frontend/                                    React app (Vite + TypeScript)
 docs/                                        architecture, API conventions, growth path, ADRs
 deptrac.yaml phpstan.neon pint.json          quality tool configs
 .github/workflows/ci.yml                     composer ci on PHP 8.4, no database

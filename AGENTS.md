@@ -16,6 +16,8 @@
 - Checks: `composer ci` = `composer lint` + `composer analyse` + `composer deptrac` + `composer test`. Fix style with `composer lint:fix`.
 - Database: MySQL (`urban_nest_api`; tests use `urban_nest_api_testing` with RefreshDatabase). Each module owns its tables: models in `Modules\{Module}\Models`, migrations in `modules/{Module}/Database/Migrations` (loaded by the module's provider). See docs/decisions/0006.
 - Auth: Sanctum bearer tokens (`auth:sanctum`). Roles are `user`, `admin`, `guest` (`Modules\Auth\DTOs\UserRole`); never let a client choose its role.
+- Frontend: React 19 + TypeScript + Vite in `frontend/` (ADR 0008). It calls `/api/...` on its own origin (Vite proxy in dev, nginx in Docker). Check: `npm run lint && npm run build` in `frontend/`.
+- Huge tables (products, users) use cursor pagination: `CursorListRequest` + `CursorPaginatedCollection` (no COUNT, no OFFSET).
 - Orders has no tables yet: keep its `TODO(db)` markers until Orders is implemented.
 - Unfinished endpoints throw `Modules\Shared\Exceptions\NotImplementedException` (501).
 - Markers: `TODO(db)` (needs tables), `TODO(auth)` (needs authentication). Search for them before starting either.
