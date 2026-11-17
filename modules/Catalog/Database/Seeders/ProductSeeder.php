@@ -16,7 +16,7 @@ use RuntimeException;
  *   INSERT IGNORE on the unique sku skips anything already there.
  * - Rows come from ProductRowGenerator, so product n always has the same data.
  *
- * About 10-20 minutes for 10 million rows on a laptop; ~4 GB of disk.
+ * About 17 minutes for 10 million rows on a laptop; ~5 GB of disk.
  */
 final class ProductSeeder extends Seeder
 {

@@ -50,7 +50,7 @@ if [ "${RUN_MIGRATIONS:-true}" = "true" ]; then
         echo (int) $pdo->query("SELECT COUNT(*) FROM users")->fetchColumn();
     ')
     if [ "$USERS" = "0" ] && [ "${SEED_ON_FIRST_RUN:-true}" = "true" ]; then
-        log "empty database: seeding (SEED_BULK_USERS=${SEED_BULK_USERS:-1000000}); this takes a minute or two"
+        log "empty database: seeding (SEED_BULK_USERS=${SEED_BULK_USERS:-1000000}, SEED_PRODUCTS=${SEED_PRODUCTS:-10000000}); this can take 20+ minutes"
         php -d memory_limit=1G artisan db:seed --force --no-interaction
     else
         log "database already has ${USERS} users: skipping seed"

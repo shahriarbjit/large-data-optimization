@@ -30,7 +30,7 @@ composer install
 cp .env.example .env         # then set DB_USERNAME / DB_PASSWORD
 php artisan key:generate
 php artisan migrate
-php artisan db:seed          # admin + user accounts and 1,000,000 fake users (~70 s; SEED_BULK_USERS=0 to skip)
+php artisan db:seed          # accounts, 1,000,000 users (~1 min) and 10,000,000 products (~17 min, ~5 GB); see config/seed.php
 composer ci                  # lint, static analysis, boundaries, tests
 php artisan serve            # http://127.0.0.1:8000
 ```
@@ -52,6 +52,25 @@ curl -i http://127.0.0.1:8000/api/v1/orders/1               # 501 not_implemente
 curl -i http://127.0.0.1:8000/api/v1/nope                   # 404, standard error format
 ```
 
+### Product data (search practice)
+
+The Catalog module seeds a `products` table with 10,000,000 realistic rows: `php artisan db:seed --class="Modules\Catalog\Database\Seeders\ProductSeeder"`. The seeder is resumable: run it again to continue after an interruption.
+
+| Column | Example | Useful for |
+| --- | --- | --- |
+| `sku` | `SKU-0000000007` | exact lookup (unique) |
+| `name` | `Padma Premium Cotton Panjabi PA-4821` | full-text search, relevance |
+| `description` | 3 sentences from shared templates | full-text search, highlighting |
+| `brand`, `category`, `color` | `Padma`, `Men Clothing`, `Navy` | filters and facets (20 categories, 40 brands, 16 colours) |
+| `tags` | `["cotton","eid","navy"]` (JSON) | keyword filters, facets |
+| `price`, `currency` | `"2459.00"`, `BDT` | range filters, sorting |
+| `stock`, `rating`, `reviews_count` | `120`, `4.3`, `812` | filters, boosting |
+| `image` | `https://picsum.photos/seed/urban-nest-7/640/640` | display |
+| `is_active` | `true` (~97%) | filter |
+| `created_at`, `updated_at` | spread over 3 years, oldest first | date ranges, incremental sync |
+
+Product number *n* always gets the same data (`ProductRowGenerator`).
+
 ## Run with Docker (any PC, no PHP or MySQL needed)
 
 Needs only [Docker Desktop](https://www.docker.com/products/docker-desktop/) (or Docker Engine with Compose v2).
@@ -67,7 +86,8 @@ Then open http://localhost:8080/api/v1/health.
 On the **first start**, with an empty database, the app container:
 - runs the migrations;
 - seeds the admin and user accounts above;
-- seeds 1,000,000 fake users (about 30 seconds).
+- seeds 1,000,000 fake users (about 30 seconds);
+- seeds 10,000,000 products for search practice (about 17 minutes, about 5 GB).
 
 Later starts keep the data and skip seeding.
 
@@ -86,7 +106,7 @@ Later starts keep the data and skip seeding.
 | `docker compose down` | Stop; data is kept. |
 | `docker compose down -v` | Stop and **delete all data**; the next `up` migrates and seeds again. |
 
-To seed fewer users, set `DOCKER_SEED_BULK_USERS=1000` (or `0`) in your shell, or in a `.env` file next to `compose.yaml`, **before the first start**. Images:
+To seed less, set `DOCKER_SEED_BULK_USERS=1000` and `DOCKER_SEED_PRODUCTS=100000` (or `0`) in your shell, or in a `.env` file next to `compose.yaml`, **before the first start**. Images:
 - `app`: PHP 8.4 FPM, without dev packages; see `Dockerfile`.
 - `web`: nginx in front of `app`; see `docker/nginx/default.conf`.
 - `db`: MySQL 8.4 with a named volume.
