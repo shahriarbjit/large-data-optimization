@@ -8,6 +8,7 @@ use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Modules\Catalog\Database\Factories\ProductFactory;
+use Modules\Catalog\DTOs\ProductData;
 
 /**
  * Internal to the Catalog module.
@@ -53,6 +54,29 @@ final class Product extends Model
             'created_at' => 'immutable_datetime',
             'updated_at' => 'immutable_datetime',
         ];
+    }
+
+    public function toData(): ProductData
+    {
+        return new ProductData(
+            id: $this->id,
+            sku: $this->sku,
+            name: $this->name,
+            description: $this->description,
+            brand: $this->brand,
+            category: $this->category,
+            color: $this->color,
+            tags: $this->tags,
+            price: $this->price,
+            currency: $this->currency,
+            stock: $this->stock,
+            rating: $this->rating,
+            reviewsCount: $this->reviews_count,
+            image: $this->image,
+            isActive: $this->is_active,
+            createdAt: $this->created_at,
+            updatedAt: $this->updated_at,
+        );
     }
 
     protected static function newFactory(): ProductFactory

@@ -88,12 +88,14 @@ foreach (ArchHelpers::modules() as $module) {
         ->not->toExtend('Illuminate\Database\Eloquent\Model')
         ->ignoring("Modules\\{$module}\\Models");
 
-    arch("{$module}: models are used only by the module's Services, Database and Providers")
+    // Policies receive the authenticated model from Laravel's Gate.
+    arch("{$module}: models are used only by the module's Services, Database, Policies and Providers")
         ->expect("Modules\\{$module}\\Models")
         ->toOnlyBeUsedIn([
             "Modules\\{$module}\\Services",
             "Modules\\{$module}\\Database",
             "Modules\\{$module}\\Models",
+            "Modules\\{$module}\\Policies",
             "Modules\\{$module}\\Providers",
         ]);
 

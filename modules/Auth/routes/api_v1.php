@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use Illuminate\Support\Facades\Route;
 use Modules\Auth\Http\Controllers\AuthController;
+use Modules\Auth\Http\Controllers\UserController;
 
 /*
  * Auth routes. Loaded by routes/api.php inside the /api/v1 group, so the
@@ -24,3 +25,10 @@ Route::prefix('auth')
             Route::get('me', [AuthController::class, 'me'])->name('me');
         });
     });
+
+/*
+ * Users (admins only; UserPolicy). Uses only the general "api" rate limiter.
+ */
+Route::middleware('auth:sanctum')->group(function (): void {
+    Route::get('users', [UserController::class, 'index'])->name('users.index');
+});
