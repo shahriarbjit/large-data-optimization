@@ -78,6 +78,10 @@ final class MakeModuleCommand extends Command
         $deptrac = $this->readWithMarker($deptracFile, self::DEPTRAC_LAYERS_MARKER);
         $this->readWithMarker($deptracFile, self::DEPTRAC_RULESET_MARKER);
 
+        if (str_contains($config, "'{$name}' =>") || preg_match('/^\s*- name: '.preg_quote($name, '/').'$/m', $deptrac) === 1) {
+            throw new RuntimeException("Module [{$name}] is already registered in config/modules.php or deptrac.yaml. Nothing was changed.");
+        }
+
         if (! $this->files->isDirectory($stubsDir)) {
             throw new RuntimeException("Stub folder not found: {$stubsDir}");
         }

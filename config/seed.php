@@ -37,4 +37,13 @@ return [
     // Rows per INSERT statement.
     'bulk_chunk' => 5_000,
 
+    /*
+     * Products for search practice (Catalog module). ~10-20 minutes and
+     * ~4 GB for 10 million. Resumable: run the seeder again to continue.
+     * Set to 0 to skip.
+     */
+    'products' => (int) env('SEED_PRODUCTS', 10_000_000),
+
+    'products_chunk' => 2_000,
+
 ];

@@ -26,22 +26,22 @@ afterEach(function (): void {
 });
 
 it('creates the full module skeleton', function (): void {
-    $this->artisan('module:make', ['name' => 'Payments', '--base' => $this->base])->assertSuccessful();
+    $this->artisan('module:make', ['name' => 'Sandbox', '--base' => $this->base])->assertSuccessful();
 
-    $module = $this->base.'/modules/Payments';
+    $module = $this->base.'/modules/Sandbox';
 
     foreach ([
-        'Providers/PaymentsServiceProvider.php',
-        'Contracts/PaymentsServiceContract.php',
+        'Providers/SandboxServiceProvider.php',
+        'Contracts/SandboxServiceContract.php',
         'DTOs/ExampleData.php',
         'Events/ExampleCreated.php',
-        'Services/PaymentsService.php',
-        'Http/Controllers/PaymentsController.php',
+        'Services/SandboxService.php',
+        'Http/Controllers/SandboxController.php',
         'Http/Requests/CreateExampleRequest.php',
         'Http/Resources/ExampleResource.php',
         'Policies/.gitkeep',
         'routes/api_v1.php',
-        'tests/Feature/PaymentsExampleEndpointTest.php',
+        'tests/Feature/SandboxExampleEndpointTest.php',
         'tests/Unit/.gitkeep',
     ] as $path) {
         expect($module.'/'.$path)->toBeFile();
@@ -86,24 +86,24 @@ it('generates code that passes the project code style (Pint)', function (string 
 })->with(['Demo', 'StockTransfers', 'Accounts', 'Zones']);
 
 it('registers the provider in config/modules.php', function (): void {
-    $this->artisan('module:make', ['name' => 'Payments', '--base' => $this->base])->assertSuccessful();
+    $this->artisan('module:make', ['name' => 'Sandbox', '--base' => $this->base])->assertSuccessful();
 
     $config = require $this->base.'/config/modules.php';
 
-    expect($config['enabled'])->toHaveKey('Payments', 'Modules\Payments\Providers\PaymentsServiceProvider')
+    expect($config['enabled'])->toHaveKey('Sandbox', 'Modules\Sandbox\Providers\SandboxServiceProvider')
         ->and(file_get_contents($this->base.'/config/modules.php'))->toContain('// module:make providers');
 });
 
 it('adds a Deptrac layer and ruleset entry', function (): void {
-    $this->artisan('module:make', ['name' => 'Payments', '--base' => $this->base])->assertSuccessful();
+    $this->artisan('module:make', ['name' => 'Sandbox', '--base' => $this->base])->assertSuccessful();
 
     $deptrac = Yaml::parseFile($this->base.'/deptrac.yaml')['deptrac'];
     $layers = collect($deptrac['layers'])->keyBy('name');
 
-    expect($layers)->toHaveKey('Payments')
-        ->and($layers['Payments']['collectors'][0]['must'][0]['value'])->toBe('^Modules\\\\Payments\\\\.*')
-        ->and($layers['Payments']['collectors'][0]['must_not'][0]['value'])->toBe('ModulesPublic')
-        ->and($deptrac['ruleset']['Payments'])->toBe(['Shared', 'ModulesPublic']);
+    expect($layers)->toHaveKey('Sandbox')
+        ->and($layers['Sandbox']['collectors'][0]['must'][0]['value'])->toBe('^Modules\\\\Sandbox\\\\.*')
+        ->and($layers['Sandbox']['collectors'][0]['must_not'][0]['value'])->toBe('ModulesPublic')
+        ->and($deptrac['ruleset']['Sandbox'])->toBe(['Shared', 'ModulesPublic']);
 
     expect(file_get_contents($this->base.'/deptrac.yaml'))
         ->toContain('# module:make layers')
@@ -111,31 +111,43 @@ it('adds a Deptrac layer and ruleset entry', function (): void {
 });
 
 it('can add several modules one after another', function (): void {
-    $this->artisan('module:make', ['name' => 'Payments', '--base' => $this->base])->assertSuccessful();
-    $this->artisan('module:make', ['name' => 'Catalog', '--base' => $this->base])->assertSuccessful();
+    $this->artisan('module:make', ['name' => 'Sandbox', '--base' => $this->base])->assertSuccessful();
+    $this->artisan('module:make', ['name' => 'SandboxTwo', '--base' => $this->base])->assertSuccessful();
 
     $config = require $this->base.'/config/modules.php';
     $deptrac = Yaml::parseFile($this->base.'/deptrac.yaml')['deptrac'];
 
     // Appended after any modules the project already has, in creation order.
-    expect(array_slice(array_keys($config['enabled']), -2))->toBe(['Payments', 'Catalog'])
-        ->and($deptrac['ruleset'])->toHaveKeys(['Payments', 'Catalog']);
+    expect(array_slice(array_keys($config['enabled']), -2))->toBe(['Sandbox', 'SandboxTwo'])
+        ->and($deptrac['ruleset'])->toHaveKeys(['Sandbox', 'SandboxTwo']);
 });
 
 it('refuses to overwrite an existing module and changes nothing', function (): void {
-    $this->artisan('module:make', ['name' => 'Payments', '--base' => $this->base])->assertSuccessful();
+    $this->artisan('module:make', ['name' => 'Sandbox', '--base' => $this->base])->assertSuccessful();
 
     $config = file_get_contents($this->base.'/config/modules.php');
     $deptrac = file_get_contents($this->base.'/deptrac.yaml');
-    file_put_contents($this->base.'/modules/Payments/marker.txt', 'keep me');
+    file_put_contents($this->base.'/modules/Sandbox/marker.txt', 'keep me');
 
-    $this->artisan('module:make', ['name' => 'Payments', '--base' => $this->base])
+    $this->artisan('module:make', ['name' => 'Sandbox', '--base' => $this->base])
         ->expectsOutputToContain('already exists')
         ->assertFailed();
 
     expect(file_get_contents($this->base.'/config/modules.php'))->toBe($config)
         ->and(file_get_contents($this->base.'/deptrac.yaml'))->toBe($deptrac)
-        ->and(file_get_contents($this->base.'/modules/Payments/marker.txt'))->toBe('keep me');
+        ->and(file_get_contents($this->base.'/modules/Sandbox/marker.txt'))->toBe('keep me');
+});
+
+it('refuses a module that is already registered, even if its folder is missing', function (): void {
+    // The temp copy of config/modules.php lists the project's real modules (Auth, Orders, ...).
+    $config = file_get_contents($this->base.'/config/modules.php');
+
+    $this->artisan('module:make', ['name' => 'Auth', '--base' => $this->base])
+        ->expectsOutputToContain('already registered')
+        ->assertFailed();
+
+    expect(file_get_contents($this->base.'/config/modules.php'))->toBe($config)
+        ->and($this->base.'/modules/Auth')->not->toBeDirectory();
 });
 
 it('rejects invalid and reserved names', function (string $name): void {
@@ -148,10 +160,10 @@ it('writes nothing when a marker is missing', function (): void {
     file_put_contents($this->base.'/deptrac.yaml', str_replace('# module:make ruleset', '', (string) file_get_contents($this->base.'/deptrac.yaml')));
     $config = file_get_contents($this->base.'/config/modules.php');
 
-    $this->artisan('module:make', ['name' => 'Payments', '--base' => $this->base])
+    $this->artisan('module:make', ['name' => 'Sandbox', '--base' => $this->base])
         ->expectsOutputToContain('Marker')
         ->assertFailed();
 
-    expect($this->base.'/modules/Payments')->not->toBeDirectory()
+    expect($this->base.'/modules/Sandbox')->not->toBeDirectory()
         ->and(file_get_contents($this->base.'/config/modules.php'))->toBe($config);
 });

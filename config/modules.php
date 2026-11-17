@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use Modules\Auth\Providers\AuthServiceProvider;
+use Modules\Catalog\Providers\CatalogServiceProvider;
 use Modules\Orders\Providers\OrdersServiceProvider;
 
 /*
@@ -22,6 +23,7 @@ return [
     'enabled' => [
         'Auth' => AuthServiceProvider::class,
         'Orders' => OrdersServiceProvider::class,
+        'Catalog' => CatalogServiceProvider::class,
         // module:make providers
     ],
 

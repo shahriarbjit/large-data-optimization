@@ -39,6 +39,7 @@
         <env name="QUEUE_CONNECTION" value="sync"/>
         <env name="SESSION_DRIVER" value="array"/>
         <env name="SEED_BULK_USERS" value="0"/>
+        <env name="SEED_PRODUCTS" value="0"/>
         <env name="LOG_CHANNEL" value="null"/>
         <env name="PULSE_ENABLED" value="false"/>
         <env name="TELESCOPE_ENABLED" value="false"/>

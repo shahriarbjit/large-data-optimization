@@ -56,6 +56,16 @@ deptrac:
             - type: layer
               value: ModulesPublic
 
+    - name: Catalog
+      collectors:
+        - type: bool
+          must:
+            - type: classLike
+              value: ^Modules\\Catalog\\.*
+          must_not:
+            - type: layer
+              value: ModulesPublic
+
     # module:make layers
 
   ruleset:
@@ -68,6 +78,9 @@ deptrac:
       - Shared
       - ModulesPublic
     Orders:
+      - Shared
+      - ModulesPublic
+    Catalog:
       - Shared
       - ModulesPublic
     # module:make ruleset
