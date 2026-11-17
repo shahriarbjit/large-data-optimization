@@ -131,6 +131,8 @@ Later starts keep the data and skip seeding.
 | `docker compose down` | Stop; data is kept. |
 | `docker compose down -v` | Stop and **delete all data**; the next `up` migrates and seeds again. |
 
+**One database for both:** to make `php artisan serve` (and `npm run dev`) use the Docker MySQL instead of a local one, set `DB_PORT=3307` and `DB_PASSWORD=secret` in `.env`. Then http://localhost:5173 and http://localhost:3000 show the same data. Tests then use `urban_nest_api_testing` in Docker too.
+
 **Port already in use** (for example another project on 8080, so `web` fails to start): add `DOCKER_HTTP_PORT=8081` to `.env` (Compose reads it), then run `docker compose up -d web`. The same works for `DOCKER_DB_PORT`, `DOCKER_ES_PORT` and `DOCKER_KIBANA_PORT`.
 
 To seed less, set `DOCKER_SEED_BULK_USERS=1000` and `DOCKER_SEED_PRODUCTS=100000` (or `0`) in your shell, or in a `.env` file next to `compose.yaml`, **before the first start**. Images:
