@@ -28,6 +28,14 @@ return [
         'region' => env('AWS_DEFAULT_REGION', 'us-east-1'),
     ],
 
+    /*
+     * Elasticsearch (local search practice; see docs/decisions/0007).
+     * Docker sets http://elasticsearch:9200 for the app container.
+     */
+    'elasticsearch' => [
+        'host' => env('ELASTICSEARCH_HOST', 'http://localhost:9200'),
+    ],
+
     'slack' => [
         'notifications' => [
             'bot_user_oauth_token' => env('SLACK_BOT_USER_OAUTH_TOKEN'),

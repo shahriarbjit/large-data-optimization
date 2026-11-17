@@ -111,6 +111,28 @@ To seed less, set `DOCKER_SEED_BULK_USERS=1000` and `DOCKER_SEED_PRODUCTS=100000
 - `web`: nginx in front of `app`; see `docker/nginx/default.conf`.
 - `db`: MySQL 8.4 with a named volume.
 
+### Elasticsearch and Kibana (search practice)
+
+Elasticsearch 9 and Kibana run in Docker ([ADR 0007](docs/decisions/0007-elasticsearch-in-docker.md)). Security is off, so both listen on `127.0.0.1` only. Never expose them to a network.
+
+```bash
+docker compose up -d elasticsearch kibana        # only these two; `docker compose up -d` starts everything
+curl http://localhost:9200                       # version info
+curl "http://localhost:9200/_cluster/health?pretty"
+```
+
+| What | Where |
+| --- | --- |
+| Elasticsearch | http://localhost:9200 (`DOCKER_ES_PORT`) |
+| Kibana | http://localhost:5601 (`DOCKER_KIBANA_PORT`); Dev Tools: menu ☰ → Management → **Dev Tools**, or http://localhost:5601/app/dev_tools#/console |
+| From Laravel | `config('services.elasticsearch.host')`: `ELASTICSEARCH_HOST`, `http://elasticsearch:9200` inside Docker |
+
+- Kibana takes 1-2 minutes to become ready after Elasticsearch is healthy.
+- Change the version with `ELASTIC_VERSION` (keep both the same) and the heap with `DOCKER_ES_HEAP` (default `1g`).
+- On Linux, run `sudo sysctl -w vm.max_map_count=262144` first. Docker Desktop (Windows, macOS) needs nothing.
+- A single node shows **yellow** health for indexes with replicas; use `number_of_replicas: 0` for practice indexes.
+- `docker compose down -v` also deletes the Elasticsearch data (`es-data` volume).
+
 ## Commands
 
 | Command | What it does |

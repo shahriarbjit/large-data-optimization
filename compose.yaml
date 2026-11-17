@@ -5,9 +5,11 @@
 #   docker compose down                 stop (data is kept)
 #   docker compose down -v              stop and delete all data
 #   docker compose --profile test run --rm --build test    run `composer ci` in Docker
+#   docker compose up -d elasticsearch kibana               only Elasticsearch + Kibana
 #
 # Optional overrides (shell or a .env file next to this one): DOCKER_HTTP_PORT,
-# DOCKER_DB_PORT, DOCKER_DB_PASSWORD, DOCKER_SEED_BULK_USERS, DOCKER_SEED_PRODUCTS.
+# DOCKER_DB_PORT, DOCKER_DB_PASSWORD, DOCKER_SEED_BULK_USERS, DOCKER_SEED_PRODUCTS,
+# ELASTIC_VERSION, DOCKER_ES_HEAP, DOCKER_ES_PORT, DOCKER_KIBANA_PORT.
 
 name: urban-nest-api
 
@@ -31,6 +33,7 @@ x-app-env: &app-env
   SANCTUM_EXPIRATION: "10080"
   SEED_BULK_USERS: ${DOCKER_SEED_BULK_USERS:-1000000}
   SEED_PRODUCTS: ${DOCKER_SEED_PRODUCTS:-10000000}
+  ELASTICSEARCH_HOST: http://elasticsearch:9200
 
 services:
   db:
@@ -80,6 +83,39 @@ services:
       app:
         condition: service_healthy
 
+  # Elasticsearch for local search practice. Security is OFF: never expose
+  # this port to a network. Bound to 127.0.0.1 so only this PC can reach it.
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:${ELASTIC_VERSION:-9.1.5}
+    environment:
+      discovery.type: single-node
+      xpack.security.enabled: "false"
+      ES_JAVA_OPTS: -Xms${DOCKER_ES_HEAP:-1g} -Xmx${DOCKER_ES_HEAP:-1g}
+    ulimits:
+      memlock: { soft: -1, hard: -1 }
+      nofile: { soft: 65536, hard: 65536 }
+    ports:
+      - "127.0.0.1:${DOCKER_ES_PORT:-9200}:9200"
+    volumes:
+      - es-data:/usr/share/elasticsearch/data
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fs 'http://127.0.0.1:9200/_cluster/health?wait_for_status=yellow&timeout=5s' >/dev/null"]
+      interval: 10s
+      timeout: 10s
+      retries: 30
+      start_period: 60s
+
+  # Kibana: web console (Dev Tools) for Elasticsearch, http://localhost:5601
+  kibana:
+    image: docker.elastic.co/kibana/kibana:${ELASTIC_VERSION:-9.1.5}
+    environment:
+      ELASTICSEARCH_HOSTS: http://elasticsearch:9200
+    ports:
+      - "127.0.0.1:${DOCKER_KIBANA_PORT:-5601}:5601"
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
+
   # docker compose --profile test run --rm --build test
   test:
     profiles: [test]
@@ -100,3 +136,4 @@ services:
 volumes:
   db-data:
   storage:
+  es-data:
