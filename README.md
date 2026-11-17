@@ -11,29 +11,29 @@ Quality gates: Pint, Larastan (level 8), Deptrac (module boundaries) and Pest (f
 
 ## Requirements
 
-- PHP **8.4+** with the curl, fileinfo, intl, mbstring, openssl, zip and pdo_mysql extensions
-- Composer 2
-- MySQL 8+ ([ADR 0006](docs/decisions/0006-mysql-sanctum-roles.md))
+- [Docker Desktop](https://www.docker.com/products/docker-desktop/) (or Docker Engine with Compose v2). **The database runs in Docker; do not install MySQL** ([ADR 0009](docs/decisions/0009-docker-mysql-for-development.md)).
+- To develop on your PC: PHP **8.4+** (curl, fileinfo, intl, mbstring, openssl, zip, pdo_mysql), Composer 2 and Node 20+.
 
 ## Setup
 
-Create two databases first (app and tests):
-
-```sql
-CREATE DATABASE urban_nest_api CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-CREATE DATABASE urban_nest_api_testing CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-```
-
 ```bash
 git clone <repo-url> urban-nest-api && cd urban-nest-api
+docker compose up -d --build # MySQL, API, React app, Elasticsearch, Kibana
+docker compose logs -f app   # first start migrates and seeds (20+ min for 10M products); wait for "[entrypoint] ready"
+
 composer install
-cp .env.example .env         # then set DB_USERNAME / DB_PASSWORD
+cp .env.example .env         # no database settings needed
 php artisan key:generate
-php artisan migrate
-php artisan db:seed          # accounts, 1,000,000 users (~1 min) and 10,000,000 products (~17 min, ~5 GB); see config/seed.php
-composer ci                  # lint, static analysis, boundaries, tests
+composer ci                  # lint, static analysis, boundaries, tests (uses the Docker MySQL)
 php artisan serve            # http://127.0.0.1:8000
 ```
+
+There is **one database**: the MySQL container on your PC.
+- `php artisan` on your PC reaches it at `127.0.0.1:3307` (`root` / `secret`). These are the defaults in `config/database.php`, so `.env` needs no `DB_*` lines.
+- The containers reach it as `db:3306`.
+- Data lives in the `db-data` Docker volume and survives `docker compose down`; `docker compose down -v` deletes it.
+- DBeaver or another client: host `localhost`, port `3307`, user `root`, password `secret`, database `urban_nest_api`. With MySQL 8.4, set the driver property `allowPublicKeyRetrieval=true`.
+- Tests use the `urban_nest_api_testing` database on the same server; it is created automatically on the first start.
 
 Seeded accounts (local only; change them with the `SEED_*` variables in `.env`):
 
@@ -41,7 +41,7 @@ Seeded accounts (local only; change them with the `SEED_*` variables in `.env`):
 | --- | --- | --- |
 | admin | `admin@urban-nest.test` | `Admin@123456` |
 | user | `user@urban-nest.test` | `User@1234567` |
-| user / guest (bulk) | `user1@example.test` Ã¢â‚¬Â¦ `user1000000@example.test` (every 10th is a guest) | `password1234` |
+| user / guest (bulk) | `user1@example.test` … `user1000000@example.test` (every 10th is a guest) | `password1234` |
 
 Try it:
 
@@ -131,7 +131,7 @@ Later starts keep the data and skip seeding.
 | `docker compose down` | Stop; data is kept. |
 | `docker compose down -v` | Stop and **delete all data**; the next `up` migrates and seeds again. |
 
-**One database for both:** to make `php artisan serve` (and `npm run dev`) use the Docker MySQL instead of a local one, set `DB_PORT=3307` and `DB_PASSWORD=secret` in `.env`. Then http://localhost:5173 and http://localhost:3000 show the same data. Tests then use `urban_nest_api_testing` in Docker too.
+**One database for everything:** `php artisan serve` with `npm run dev` (http://localhost:5173) and the Docker app (http://localhost:3000) use the same MySQL container, so both show the same data. If you change `DOCKER_DB_PORT` or `DOCKER_DB_PASSWORD`, also set `DB_PORT` / `DB_PASSWORD` in `.env` to match.
 
 **Port already in use** (for example another project on 8080, so `web` fails to start): add `DOCKER_HTTP_PORT=8081` to `.env` (Compose reads it), then run `docker compose up -d web`. The same works for `DOCKER_DB_PORT`, `DOCKER_ES_PORT` and `DOCKER_KIBANA_PORT`.
 
@@ -153,7 +153,7 @@ curl "http://localhost:9200/_cluster/health?pretty"
 | What | Where |
 | --- | --- |
 | Elasticsearch | http://localhost:9200 (`DOCKER_ES_PORT`) |
-| Kibana | http://localhost:5601 (`DOCKER_KIBANA_PORT`); Dev Tools: menu Ã¢ËœÂ° Ã¢â€ â€™ Management Ã¢â€ â€™ **Dev Tools**, or http://localhost:5601/app/dev_tools#/console |
+| Kibana | http://localhost:5601 (`DOCKER_KIBANA_PORT`); Dev Tools: menu ☰ → Management → **Dev Tools**, or http://localhost:5601/app/dev_tools#/console |
 | From Laravel | `config('services.elasticsearch.host')`: `ELASTICSEARCH_HOST`, `http://elasticsearch:9200` inside Docker |
 
 - Kibana takes 1-2 minutes to become ready after Elasticsearch is healthy.
